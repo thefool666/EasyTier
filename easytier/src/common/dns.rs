@@ -1,13 +1,11 @@
 use std::net::{IpAddr, SocketAddr};
 use std::str::FromStr;
 use std::time::Duration;
-use std::io::Write;
 
-use hickory_resolver::Resolver;
+use hickory_resolver::Resolver;  // ← 必须是 hickory，不是 trust_dns
 use hickory_resolver::config::{ResolverConfig, ResolverOpts, NameServerConfig};
 use hickory_proto::rr::RecordType;
 
-/// 保留原函数名、参数、返回值，仅替换内部逻辑
 pub fn resolve_addr(addr: &str) -> Result<SocketAddr, Box<dyn std::error::Error + Send + Sync>> {
     eprintln!("[DNS] 解析地址：{}（优先IPv6）", addr);
 
