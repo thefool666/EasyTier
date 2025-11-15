@@ -6,11 +6,9 @@ use trust_dns_resolver::Resolver;
 use trust_dns_resolver::config::{ResolverConfig, ResolverOpts, NameServerConfig};
 use trust_dns_proto::rr::RecordType;
 
-/// 保留原函数接口
 pub fn resolve_addr(addr: &str) -> Result<SocketAddr, Box<dyn std::error::Error + Send + Sync>> {
     eprintln!("[DNS] 解析地址：{}（优先IPv6）", addr);
 
-    // 优先解析IP:端口
     if let Ok(socket_addr) = SocketAddr::from_str(addr) {
         eprintln!("[DNS] 直接解析IP成功：{}", socket_addr);
         return Ok(socket_addr);
@@ -21,7 +19,6 @@ pub fn resolve_addr(addr: &str) -> Result<SocketAddr, Box<dyn std::error::Error 
     let port = port_str.parse::<u16>()
         .map_err(|e| format!("端口解析失败：{}（{}）", port_str, e))?;
 
-    // 硬编码Cloudflare双栈DNS
     let dns_servers = [
         ("2606:4700:4700::1111", 53),
         ("1.1.1.1", 53)
@@ -31,19 +28,16 @@ pub fn resolve_addr(addr: &str) -> Result<SocketAddr, Box<dyn std::error::Error 
         dns_config.add_name_server(NameServerConfig::udp((dns_ip, dns_port).into()));
     }
 
-    // 配置解析选项
     let mut dns_opts = ResolverOpts::default();
     dns_opts.timeout = Duration::from_secs(5);
     dns_opts.attempts = 2;
     dns_opts.rotate_servers = true;
     dns_opts.use_hosts_file = false;
 
-    // 创建resolver
     let resolver = Resolver::new(dns_config, dns_opts)?;
 
     let mut ip: Option<IpAddr> = None;
 
-    // 优先解析IPv6
     if let Ok(lookup) = resolver.lookup(domain, RecordType::AAAA) {
         ip = lookup.iter().find_map(|r| r.data().map(|d| d.into()));
         if ip.is_some() {
@@ -51,7 +45,6 @@ pub fn resolve_addr(addr: &str) -> Result<SocketAddr, Box<dyn std::error::Error 
         }
     }
 
-    // IPv6失败，尝试IPv4
     if ip.is_none() {
         eprintln!("[DNS] IPv6解析失败，尝试IPv4");
         if let Ok(lookup) = resolver.lookup(domain, RecordType::A) {
@@ -66,7 +59,7 @@ pub fn resolve_addr(addr: &str) -> Result<SocketAddr, Box<dyn std::error::Error 
     Ok(socket_addr)
 }
 
-/// 添加其他模块引用的辅助函数（简化版）
+// 兼容其他模块的辅助函数
 pub fn get_default_resolver_config() -> Option<trust_dns_resolver::config::ResolverConfig> {
     None
 }
