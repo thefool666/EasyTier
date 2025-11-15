@@ -20,6 +20,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y protobuf-compiler
 
+      - name: Verify protoc installation
+        run: |
+          which protoc
+          protoc --version
+          echo "PROTOC=$(which protoc)" >> $GITHUB_ENV
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
