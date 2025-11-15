@@ -21,6 +21,7 @@ jobs:
           targets: aarch64-linux-android
 
       - name: Setup Android NDK
+        id: setup-ndk  # ← 必须添加这个 ID
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26b
@@ -28,7 +29,7 @@ jobs:
 
       - name: Setup Environment for Cross-Compilation
         run: |
-          NDK=${{ steps.setup-ndk.outputs.ndk-path }}
+          NDK="${{ steps.setup-ndk.outputs.ndk-path }}"  # ← 正确引用 NDK 路径
           SYSROOT="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
           CLANG="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           
