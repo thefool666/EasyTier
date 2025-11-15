@@ -15,21 +15,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android
 
       - name: Setup Android NDK
-        id: setup-ndk  # ← 必须添加这个 ID
+        id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26b
           add-to-path: true
 
-      - name: Setup Environment for Cross-Compilation
+      - name: Setup Environment
         run: |
-          NDK="${{ steps.setup-ndk.outputs.ndk-path }}"  # ← 正确引用 NDK 路径
+          NDK="${{ steps.setup-ndk.outputs.ndk-path }}"
           SYSROOT="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
           CLANG="$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           
